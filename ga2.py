@@ -1,3 +1,4 @@
+from contextlib import closing
 import pandas as pd
 
 xls = pd.ExcelFile("data.xlsx", engine="openpyxl")
@@ -70,6 +71,13 @@ transactions_with_category["Date"] = pd.to_datetime(
 transactions_with_category["Units"] = transactions_with_category["Units"].astype(
     int)
 sales_and_sku_df = pd.merge(sales_df, sku_df, on="SKU", how="left")
+sales_and_sku_df["Date"] = pd.to_datetime(sales_and_sku_df["Date"])
+sales_and_sku_df["Sales"] = sales_and_sku_df["Sales"].astype(int)
+sales_and_sku_df["Price"] = sales_and_sku_df["Price"].astype(float)
+sales_and_sku_df["Sale Value"] = sales_and_sku_df["Sales"] * \
+    sales_and_sku_df["Price"]
+sales_and_sku_df["Category"] = sales_and_sku_df["Category"].str.strip()
+
 
 # 2. For the entire month, what is the total sale value of the game “LTA Wise City”?
 # (INTEGER)
@@ -85,16 +93,17 @@ print("Total sale value of LTA Wise City question 2 :",
 # 3. What fraction of total sale quantity (Volume) did “Books” category achieve in the first week? (Jan 1 to Jan 7, both days included) (FLOAT between 0 and 1)
 # Hint: Construct a Volume Pareto Chart
 books_sales_and_sku = sales_and_sku_df["Category"] == "Books"
+date_filter = (sales_and_sku_df["Date"] >= pd.Timestamp(
+    "2025-01-01")) & (sales_and_sku_df["Date"] <= pd.Timestamp("2025-01-07"))
+
 total_books_sales = sales_and_sku_df[books_sales_and_sku &
-                                     (sales_and_sku_df["Date"] >= "2025-01-01") &
-                                     (sales_and_sku_df["Date"] <= "2025-01-07")
-                                     ]["Sales"].sum()
-total_sales = sales_and_sku_df["Sales"].sum()
+                                     date_filter]["Sales"].sum()
+total_sales = sales_and_sku_df[date_filter]["Sales"].sum()
+
 fraction_books_sales = total_books_sales / total_sales
-print(
-    "Fraction of total sale quantity for Books category question 3:",
-    fraction_books_sales,
-)
+print("Fraction of total sale quantity for Books category question 3:",
+      fraction_books_sales)
+
 
 # 4. What is the maximum sale value by a single SKU in a day across all days?
 # (Sale Value = Sale Qty * Price per Qty) (INTEGER)
@@ -116,7 +125,7 @@ single_category_max_sale_value = date_and_category_vise_df.max()
 single_category_max = date_and_category_vise_df.idxmax()
 print(
     "The maximum revenue generating category across all days question 5:",
-    single_category_max,
+    single_category_max[0],
 )
 
 # 6. What fraction of total sale value did Mumbai achieve? (across all categories and days)
@@ -132,24 +141,29 @@ print(
 )
 
 # 7. What is the no. of units of household category SKUs are in stock at the end of
-# 17th Jan 2025 in Nasik DC? (INTEGER)
+# 15th Jan 2025 in Nasik DC? (INTEGER)
 household_stocks = stocks_df[stocks_df["Category"] == "Household"]
 opening_household_stocks = household_stocks["Nashik"].sum()
 household_stocks_transfers_df = transactions_with_category[
     (transactions_with_category["Category"] == "Household")
     & (transactions_with_category["City"] == "Nasik")
-    & (transactions_with_category["Date"] <= "2025-01-17")
-    & (transactions_with_category["Units"] > 0)
+    & (transactions_with_category["Date"] <= pd.Timestamp("2025-01-15"))
 ]
 household_stocks_transfers = household_stocks_transfers_df["Units"].sum()
-total_household_stocks = opening_household_stocks + household_stocks_transfers
+total_household_sales = sales_and_sku_df[
+    (sales_and_sku_df["Category"] == "Household")
+    & (sales_and_sku_df["City"] == "Nasik")
+    & (sales_and_sku_df["Date"] <= pd.Timestamp("2025-01-15"))
+]["Sales"].sum()
+total_household_stocks = opening_household_stocks + \
+    household_stocks_transfers - total_household_sales
 print(
     "The no. of units of household category SKUs are in stock at the end of 17th Jan 2025 in Nasik DC question 7:",
     total_household_stocks,
 )
 
 # 8. Based on the sales and stock data of Jan 2025, how many average days of
-# inventory of SKU M004 are available in Pune? (FLOAT)
+# inventory of SKU M003 are available in Pune? (FLOAT)
 
 
 def average_days_inventory(sku, city):
@@ -157,15 +171,20 @@ def average_days_inventory(sku, city):
     incomming_stocks = transactions_df[
         (transactions_df["SKU"] == sku) & (transactions_df["City"] == city)
     ]["Units"].sum()
-    sales_average = sales_and_sku_df[
+
+    total_sales_monthly = sales_and_sku_df[
         (sales_and_sku_df["SKU"] == sku) & (sales_and_sku_df["City"] == city)
-    ]["Sales"].mean()
-    return (opening_stocks + incomming_stocks) / sales_average
+    ]["Sales"].sum()
+    sales_average = total_sales_monthly / 31
+    closing_stocks = opening_stocks + incomming_stocks - total_sales_monthly
 
+    average_stocks = (
+        opening_stocks + closing_stocks) / 2
+    return average_stocks / sales_average
 
-average_days_inventory_pune_m004 = average_days_inventory("M004", "Pune")
+average_days_inventory_pune_m004 = average_days_inventory("M003", "Pune")
 print(
-    "Average days of inventory of SKU M004 in Pune question 8:",
+    "Average days of inventory of SKU M003 in Pune question 8:",
     average_days_inventory_pune_m004,
 )
 
@@ -202,13 +221,19 @@ print(
 )
 
 # 11. What is the closing stock of K005 at the end of the month in Nasik? (INTEGER)
-closing_stock_k005_nasik = stocks_df[
+opening_stocks_k005_nasik = stocks_df[
     (stocks_df["SKU"] == "K005")
 ]["Nashik"].values[0]
-closing_stock_k005_nasik += transactions_df[
+incomming_stock_k005_nasik = transactions_df[
     (transactions_df["SKU"] == "K005")
     & (transactions_df["City"] == "Nasik")
 ]["Units"].sum()
+sales_k005_nasik = sales_and_sku_df[
+    (sales_and_sku_df["SKU"] == "K005")
+    & (sales_and_sku_df["City"] == "Nasik")
+]["Sales"].sum()
+closing_stock_k005_nasik = opening_stocks_k005_nasik + incomming_stock_k005_nasik - sales_k005_nasik
+
 print(
     "Closing stock of K005 at the end of the month in Nasik question 11:",
     closing_stock_k005_nasik,
