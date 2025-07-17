@@ -1,0 +1,51 @@
+SKU,Description,Category,MUMBAI,Pune,Aurangabad,Nashik
+F001,Prateek England,Fashion ,66,232,85,57
+F002,Lucy Phillepe,Fashion ,77,160,91,71
+F003,Badlands,Fashion ,82,168,89,68
+F004,Allen Dolly,Fashion ,72,182,86,73
+F005,Bucchi,Fashion ,83,240,85,63
+M001,Jhaomi,Mobiles,44,85,35,27
+M002,Samson,Mobiles,33,67,24,26
+M003,Mokia,Mobiles,39,70,26,26
+M004,Hotorola,Mobiles,40,69,82,26
+M005,2plus,Mobiles,40,70,64,21
+B001,Harry putar ,Books,89,86,112,61
+B002,4 states ,Books,88,78,103,57
+B003,Shaktiman Returns,Books,85,80,107,51
+B004,Goli's Travel,Books,91,85,103,62
+B005,Story of Your Life,Books,90,83,46,51
+V001,Prince of Dholakpur,Video Games ,157,234,57,68
+V002,Nario,Video Games ,161,115,65,62
+V003,Pacman,Video Games ,147,109,57,73
+V004,LTA Wise City,Video Games ,155,192,52,65
+V005,HIFA 2023,Video Games ,158,107,55,66
+S001,Abibas Football ,Sports / Fitness,41,68,48,32
+S002,Rural Terrain Cycles,Sports / Fitness,30,158,64,34
+S003,Monex Badminton Rackets,Sports / Fitness,46,75,51,36
+S004,Yoga Mattress,Sports / Fitness,46,68,52,37
+S005,Rocky Gym Set,Sports / Fitness,37,129,38,28
+ME001,Pyllum Trimmers,Medicines/Healthcare,36,78,31,31
+ME002,Softcare Electric Toothbrush,Medicines/Healthcare,31,79,48,30
+ME003,Leg Messager,Medicines/Healthcare,25,75,24,29
+ME004,NoFat Weighing Scale,Medicines/Healthcare,30,80,83,27
+ME005,Screw Activity Watch,Medicines/Healthcare,30,78,57,26
+K001,SureIt Purifier,Kitchen ,43,72,26,31
+K002,Parrot Induction Stove,Kitchen ,46,79,28,38
+K003,Jalepenoware Tiffin,Kitchen ,43,89,30,36
+K004,Yamaka Rex 5000W Mixer Grinder,Kitchen ,45,76,31,31
+K005,Mr.Clean Dishwasher,Kitchen ,39,74,32,35
+H001,Blessing Atta 10kg pack,Household  ,200,249,122,265
+H002,Amazing CornFlakes,Household  ,189,247,110,109
+H003,Tata Yellow Label,Household  ,191,247,119,99
+H004,Descafe Gold Blend coffee,Household  ,172,262,125,101
+H005,Handmade Basmati Rice,Household  ,185,261,99,100
+P001,Podigree Dog Food,Pet Supplies,143,404,28,54
+P002,Matty Dog Bed,Pet Supplies,134,333,30,50
+P003,Park Range Pet Shampoo,Pet Supplies,131,228,55,59
+P004,Old Mint Pet Shampoos,Pet Supplies,135,230,41,53
+P005,Reflective Dog RainCoat,Pet Supplies,139,122,86,57
+G001,Crafting Chandlar ,Gifting,41,79,43,64
+G002,Desi Kurti,Gifting,94,346,51,62
+G003,Family Cake and Card Combo,Gifting,114,146,46,67
+G004,Exact Flower Vase,Gifting,101,113,51,51
+G005,Friends Dinner Set,Gifting,108,124,58,59
