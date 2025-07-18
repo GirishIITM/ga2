@@ -190,22 +190,17 @@ print(
 
 # 9. Which SKU has the highest average days of inventory in Aurangabad? (STRING)
 sku_list = stocks_df["SKU"].unique()
-def highest_average_days_inventory(city):
-    max_days = 0
-    max_sku = ""
-    for sku in sku_list:
-        days = average_days_inventory(sku, city)
-        if days > max_days:
-            max_days = days
-            max_sku = sku
-    return max_sku
+max_days = 0
+max_sku = ""
+for sku in sku_list:
+    days = average_days_inventory(sku, "Aurangabad")
+    if days > max_days:
+        max_days = days
+        max_sku = sku
 
-
-highest_average_days_inventory_aurangabad = highest_average_days_inventory(
-    "Aurangabad")
 print(
     "SKU with the highest average days of inventory in Aurangabad question 9:",
-    highest_average_days_inventory_aurangabad,
+    max_sku,
 )
 
 # 10. How many SKUs hold at least one weeks’ worth of inventory on average in
