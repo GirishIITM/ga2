@@ -54,6 +54,7 @@ for col in transactions_clean.columns[1:]:
     temp_df["City"] = city
     temp_df["Date"] = pd.to_datetime(date)
     temp_df["Units"] = temp_df[col]
+    temp_df["SKU"] = temp_df["SKU"].str.strip()
     temp_df = temp_df[["SKU", "City", "Date", "Units"]]
     transactions_list.append(temp_df)
 
@@ -78,6 +79,19 @@ sales_and_sku_df["Sale Value"] = sales_and_sku_df["Sales"] * \
     sales_and_sku_df["Price"]
 sales_and_sku_df["Category"] = sales_and_sku_df["Category"].str.strip()
 
+# in transactions_with_category units represents incoming stocks also need to add sales column which is unique for each SKU+date+city combination
+#  it needs to be added from sales_and_sku_df units and sales are diffrent units represents incoming stocks and sales represents sales
+# so iterate through transactions_with_category and add sales column from sales_and_sku_df 
+
+transactions_with_category = pd.merge(
+    transactions_with_category,
+    sales_and_sku_df[["SKU", "City", "Date", "Sales"]],
+    on=["SKU", "City", "Date"],
+    how="left"
+)
+
+# save it to csv file
+transactions_with_category.to_csv("transactions_with_category.csv", index=False)
 
 # 2. For the entire month, what is the total sale value of the game “LTA Wise City”?
 # (INTEGER)
@@ -167,20 +181,29 @@ print(
 
 
 def average_days_inventory(sku, city):
-    opening_stocks = stocks_df[(stocks_df["SKU"] == sku)][city].values[0]
-    incomming_stocks = transactions_df[
-        (transactions_df["SKU"] == sku) & (transactions_df["City"] == city)
-    ]["Units"].sum()
+    date_range = pd.date_range(start="2025-01-01", end="2025-01-31")
 
-    total_sales_monthly = sales_and_sku_df[
-        (sales_and_sku_df["SKU"] == sku) & (sales_and_sku_df["City"] == city)
-    ]["Sales"].sum()
-    sales_average = total_sales_monthly / 31
-    closing_stocks = opening_stocks + incomming_stocks - total_sales_monthly
+    opening_stock = stocks_df[stocks_df["SKU"] == sku][city].values[0]
 
-    average_stocks = (
-        opening_stocks + closing_stocks) / 2
-    return average_stocks / sales_average
+    df = transactions_with_category[
+        (transactions_with_category["SKU"] == sku) &
+        (transactions_with_category["City"] == city)
+    ][["Date", "Units", "Sales"]].copy()
+
+    df = df.groupby("Date").agg({"Units": "sum", "Sales": "sum"}).reindex(date_range, fill_value=0)
+
+    daily_openings = []
+    for date in date_range:
+        daily_openings.append(opening_stock)
+        sales = df.loc[date, "Sales"]
+        incoming = df.loc[date, "Units"]
+        opening_stock = opening_stock - sales + incoming
+
+    avg_opening = sum(daily_openings) / len(daily_openings)
+    total_sales = df["Sales"].sum()
+    avg_sales = total_sales / len(date_range)
+
+    return avg_opening / avg_sales if avg_sales > 0 else 0
 
 average_days_inventory_pune_m004 = average_days_inventory("M003", "Pune")
 print(
@@ -227,7 +250,8 @@ sales_k005_nasik = sales_and_sku_df[
     (sales_and_sku_df["SKU"] == "K005")
     & (sales_and_sku_df["City"] == "Nasik")
 ]["Sales"].sum()
-closing_stock_k005_nasik = opening_stocks_k005_nasik + incomming_stock_k005_nasik - sales_k005_nasik
+closing_stock_k005_nasik = opening_stocks_k005_nasik + \
+    incomming_stock_k005_nasik - sales_k005_nasik
 
 print(
     "Closing stock of K005 at the end of the month in Nasik question 11:",
